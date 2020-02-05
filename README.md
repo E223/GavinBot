@@ -8,7 +8,8 @@ Respond to questions, ask your own questions, and laugh maniacally all at a simp
 
 ## Setup
 1. Install Python 3.5.3+
-2. Install [Discord py](https://discordpy.readthedocs.io/en/latest/intro.html) with voice support
-3. Install ffmpeg
-4. Put your bot token in config.json.example and rename it to config.json
-5. Run the thing (it will probably work, I think)
+2. Install dotenv
+3. Install [Discord py](https://discordpy.readthedocs.io/en/latest/intro.html) with voice support
+4. Install ffmpeg
+5. Put your bot token in config.json.example and rename it to config.json
+6. Run the thing (it will probably work, I think)

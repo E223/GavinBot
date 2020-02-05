@@ -4,4 +4,4 @@ venv/
 
 # GavinBot
 clips/
-config.json
+config.env

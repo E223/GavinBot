@@ -3,19 +3,26 @@ This code has no issues whatsoever, there is no possible room for improvement,
 it is perfect in every way imaginable.
 """
 
-import json
+import os
 import discord
 import random
 from discord.ext import commands
 from os import listdir
 from os.path import isfile, join
+from dotenv import load_dotenv
+
+load_dotenv()
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+LAUGH_PATH = os.getenv('LAUGH_PATH')
+QUESTION_PATH = os.getenv('QUESTION_PATH')
+RESPONSE_PATH = os.getenv('RESPONSE_PATH')
+TEST_PATH = os.getenv('TEST_PATH')
 
 clips = {
-    'prefix': './clips/',
-    'laugh': 'laughs/',
-    'question': 'questions/',
-    'response': 'responses/',
-    'testing': 'testing/'
+    "laugh": LAUGH_PATH,
+    "question": QUESTION_PATH,
+    "response": RESPONSE_PATH,
+    "test": TEST_PATH
 }
 
 
@@ -29,8 +36,7 @@ class Gavin(commands.Cog):
     @commands.is_owner()
     async def test(self, ctx):
         """Plays a random test clip"""
-        path = clips['prefix'] + clips['testing']
-        file = self.get_random_file(path)
+        file = self.get_random_file(TEST_PATH)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -67,8 +73,7 @@ class Gavin(commands.Cog):
     @commands.command()
     async def question(self, ctx):
         """Plays a random Gavin question"""
-        path = clips['prefix'] + clips['question']
-        file = self.get_random_file(path)
+        file = self.get_random_file(QUESTION_PATH)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -78,8 +83,7 @@ class Gavin(commands.Cog):
     @commands.command()
     async def response(self, ctx):
         """Plays a random Gavin response"""
-        path = clips['prefix'] + clips['response']
-        file = self.get_random_file(path)
+        file = self.get_random_file(RESPONSE_PATH)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -89,8 +93,7 @@ class Gavin(commands.Cog):
     @commands.command()
     async def laugh(self, ctx):
         """Plays a random Gavin laugh"""
-        path = clips['prefix'] + clips['laugh']
-        file = self.get_random_file(path)
+        file = self.get_random_file(LAUGH_PATH)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -123,7 +126,7 @@ class Gavin(commands.Cog):
         if clips[command] is None:
             return await ctx.send("Invalid command")
 
-        path = clips['prefix'] + clips[list_name]
+        path = clips[list_name]
         files = [f for f in listdir(path) if isfile(join(path, f))]
 
         embed = discord.Embed(
@@ -165,7 +168,4 @@ async def on_ready():
     print('Logged in as {0} ({0.id})'.format(bot.user))
 
 bot.add_cog(Gavin(bot))
-
-with open('config.json') as config:
-    data = json.load(config)
-    bot.run(data['bot']['token'])
+bot.run(DISCORD_TOKEN)
