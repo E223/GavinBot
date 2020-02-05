@@ -26,6 +26,25 @@ class Gavin(commands.Cog):
         self.playing_file_name = ""
 
     @commands.command()
+    @commands.is_owner()
+    async def test(self, ctx):
+        """Plays a random test clip"""
+        path = clips['prefix'] + clips['testing']
+        file = self.get_random_file(path)
+
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
+        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+
+        await ctx.send('Playing clip: {}'.format(self.playing_file_name))
+
+    @commands.command()
+    @commands.is_owner()
+    async def shutdown(self, ctx):
+        """Shutdown the bot"""
+        await ctx.send('Shutting Down.')
+        await ctx.bot.logout()
+
+    @commands.command()
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):
         """
         Joins a specified voice channel, or, if no channel is specified and the user
@@ -44,18 +63,6 @@ class Gavin(commands.Cog):
             return await ctx.author.voice.channel.connect()
         else:
             await ctx.send("You are not connected to a voice channel.")
-
-    @commands.command()
-    @commands.is_owner()
-    async def test(self, ctx):
-        """Plays a random test clip"""
-        path = clips['prefix'] + clips['testing']
-        file = self.get_random_file(path)
-
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-
-        await ctx.send('Playing clip: {}'.format(self.playing_file_name))
 
     @commands.command()
     async def question(self, ctx):
