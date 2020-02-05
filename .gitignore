@@ -1,3 +1,7 @@
 # PyCharm
 .idea/
 venv/
+
+# GavinBot
+clips/
+config.json
