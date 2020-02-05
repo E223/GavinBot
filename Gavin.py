@@ -1,3 +1,8 @@
+"""
+This code has no issues whatsoever, there is no possible room for improvement,
+it is perfect in every way imaginable.
+"""
+
 import json
 import discord
 import random
@@ -7,7 +12,7 @@ from os.path import isfile, join
 
 clips = {
     'prefix': './clips/',
-    'laughs': 'laughs/',
+    'laugh': 'laughs/',
     'question': 'questions/',
     'response': 'responses/',
     'testing': 'testing/'
@@ -18,7 +23,7 @@ class Gavin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.last_volume = 0.5
-        self.playing_song = ""
+        self.playing_file_name = ""
 
     @commands.command()
     async def join(self, ctx, *, channel: discord.VoiceChannel):
@@ -34,57 +39,45 @@ class Gavin(commands.Cog):
     async def test(self, ctx):
         """Plays a random test clip"""
         path = clips['prefix'] + clips['testing']
-        files = [f for f in listdir(path) if isfile(join(path, f))]
-        file_name = random.choice(files)
-        file = path + file_name
+        file = self.get_random_file(path)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
-        self.playing_song = file
-        await ctx.send('Playing clip: {}'.format(file_name))
+        await ctx.send('Playing clip: {}'.format(self.playing_file_name))
 
     @commands.command()
     async def question(self, ctx):
         """Plays a random Gavin question"""
-        path = clips['prefix'] + clips['questions']
-        files = [f for f in listdir(path) if isfile(join(path, f))]
-        file_name = random.choice(files)
-        file = path + file_name
+        path = clips['prefix'] + clips['question']
+        file = self.get_random_file(path)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
-        self.playing_song = file
-        await ctx.send('Playing clip: {}'.format(file_name))
+        await ctx.send('Playing clip: {}'.format(self.playing_file_name))
 
     @commands.command()
     async def response(self, ctx):
         """Plays a random Gavin response"""
-        path = clips['prefix'] + clips['responses']
-        files = [f for f in listdir(path) if isfile(join(path, f))]
-        file_name = random.choice(files)
-        file = path + file_name
+        path = clips['prefix'] + clips['response']
+        file = self.get_random_file(path)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
-        self.playing_song = file
-        await ctx.send('Playing clip: {}'.format(file_name))
+        await ctx.send('Playing clip: {}'.format(self.playing_file_name))
 
     @commands.command()
     async def laugh(self, ctx):
         """Plays a random Gavin laugh"""
-        path = clips['prefix'] + clips['laughs']
-        files = [f for f in listdir(path) if isfile(join(path, f))]
-        file_name = random.choice(files)
-        file = path + file_name
+        path = clips['prefix'] + clips['laugh']
+        file = self.get_random_file(path)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
-        self.playing_song = file
-        await ctx.send('Playing clip: {}'.format(file_name))
+        await ctx.send('Playing clip: {}'.format(self.playing_file_name))
 
     @commands.command()
     async def volume(self, ctx, volume: int):
@@ -102,7 +95,7 @@ class Gavin(commands.Cog):
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
 
-        self.playing_song = ""
+        self.playing_file_name = ""
         await ctx.voice_client.disconnect()
 
     @commands.command()
@@ -137,16 +130,16 @@ class Gavin(commands.Cog):
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
 
-    @staticmethod
-    def get_random_file(path):
+    def get_random_file(self, path):
         """Gets a random file from a specified path"""
         files = [f for f in listdir(path) if isfile(join(path, f))]
         file_name = random.choice(files)
+        self.playing_file_name = file_name
+
         return path + file_name
 
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"),
-                   description='Gavin sound samples')
+bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), description='Gavin sound samples')
 
 
 @bot.event
