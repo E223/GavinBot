@@ -11,7 +11,7 @@ from os import listdir
 from os.path import isfile, join
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path='config.env')
+load_dotenv(dotenv_path='.env')
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 LAUGH_PATH = os.getenv('LAUGH_PATH')
@@ -143,12 +143,12 @@ class Gavin(commands.Cog):
     @question.before_invoke
     @response.before_invoke
     async def ensure_voice(self, ctx):
+        if ctx.author.voice is None:
+            await ctx.send("You are not connected to a voice channel.")
+            raise commands.CommandError("Author not connected to a voice channel.")
+
         if ctx.voice_client is None:
-            if ctx.author.voice:
-                await ctx.author.voice.channel.connect()
-            else:
-                await ctx.send("You are not connected to a voice channel.")
-                raise commands.CommandError("Author not connected to a voice channel.")
+            await ctx.author.voice.channel.connect()
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
 
