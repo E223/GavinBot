@@ -26,13 +26,24 @@ class Gavin(commands.Cog):
         self.playing_file_name = ""
 
     @commands.command()
-    async def join(self, ctx, *, channel: discord.VoiceChannel):
-        """Joins a voice channel"""
+    async def join(self, ctx, *, channel: discord.VoiceChannel = None):
+        """
+        Joins a specified voice channel, or, if no channel is specified and the user
+        running the command is in a voice channel, joins the channel they are currently in.
+        """
+        if channel is not None:
+            if ctx.voice_client is not None:
+                return await ctx.voice_client.move_to(channel)
 
-        if ctx.voice_client is not None:
-            return await ctx.voice_client.move_to(channel)
+            return await channel.connect()
 
-        await channel.connect()
+        if ctx.author.voice:
+            if ctx.voice_client is not None:
+                return await ctx.voice_client.move_to(ctx.author.voice.channel)
+
+            return await ctx.author.voice.channel.connect()
+        else:
+            await ctx.send("You are not connected to a voice channel.")
 
     @commands.command()
     @commands.is_owner()
