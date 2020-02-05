@@ -11,7 +11,8 @@ from os import listdir
 from os.path import isfile, join
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path='config.env')
+
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 LAUGH_PATH = os.getenv('LAUGH_PATH')
 QUESTION_PATH = os.getenv('QUESTION_PATH')
