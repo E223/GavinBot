@@ -31,7 +31,7 @@ clips = {
 
 logger = logging.getLogger('gavin')
 logger.setLevel(logging.ERROR)
-handler = logging.FileHandler(filename='logs/gavin_errors.log', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename='logs/error.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 
