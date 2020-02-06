@@ -6,6 +6,9 @@ it is perfect in every way imaginable.
 import os
 import discord
 import random
+import logging
+from errors import errors
+from errors.ErrorHandler import ErrorHandler
 from discord.ext import commands
 from os import listdir
 from os.path import isfile, join
@@ -25,6 +28,12 @@ clips = {
     "response": RESPONSE_PATH,
     "test": TEST_PATH
 }
+
+logger = logging.getLogger('gavin')
+logger.setLevel(logging.ERROR)
+handler = logging.FileHandler(filename='logs/gavin_errors.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s: %(message)s'))
+logger.addHandler(handler)
 
 
 class Gavin(commands.Cog):
@@ -123,8 +132,8 @@ class Gavin(commands.Cog):
     @commands.command()
     async def list(self, ctx, list_name):
         """Lists the audio clips for the specified list name"""
-        command = list_name.lower()
-        if clips[command] is None:
+        list_name = list_name.lower()
+        if list_name not in clips:
             return await ctx.send("Invalid command")
 
         path = clips[list_name]
@@ -145,7 +154,7 @@ class Gavin(commands.Cog):
     async def ensure_voice(self, ctx):
         if ctx.author.voice is None:
             await ctx.send("You are not connected to a voice channel.")
-            raise commands.CommandError("Author not connected to a voice channel.")
+            raise errors.InvalidUserState("Author not connected to a voice channel.")
 
         if ctx.voice_client is None:
             await ctx.author.voice.channel.connect()
@@ -169,4 +178,5 @@ async def on_ready():
     print('Logged in as {0} ({0.id})'.format(bot.user))
 
 bot.add_cog(Gavin(bot))
+bot.add_cog(ErrorHandler(bot))
 bot.run(DISCORD_TOKEN)
