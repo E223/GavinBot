@@ -3,6 +3,6 @@
 venv/
 
 # GavinBot
-logs/
+logs/*
 clips/
 .env
