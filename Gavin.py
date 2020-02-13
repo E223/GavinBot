@@ -166,7 +166,7 @@ class Gavin(commands.Cog):
     @join.before_invoke
     async def reset_timer(self, ctx):
         if self.disconnect_timer is not None:
-            self.disconnect_timer.cancel()
+            await self.disconnect_timer.cancel()
 
         self.disconnect_timer = DisconnectTimer(self.timeout_seconds, self.stop, ctx)
 
