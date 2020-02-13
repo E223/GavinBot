@@ -38,8 +38,6 @@ class Gavin(commands.Cog):
         self.bot = bot
         self.last_volume = 0.5
         self.playing_file_name = ""
-        self.timeout_seconds = 600
-        self.disconnect_timer = None
 
     @commands.command()
     @commands.is_owner()
@@ -125,9 +123,7 @@ class Gavin(commands.Cog):
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
         await ctx.voice_client.disconnect()
-        
-        self.playing_file_name = ""
-        await self.disconnect_timer.cancel()
+        await self.bot.get_cog('DisconnectTimer').stop()
 
     @commands.command()
     async def list(self, ctx, list_name):
@@ -156,19 +152,19 @@ class Gavin(commands.Cog):
             await ctx.send("You are not connected to a voice channel.")
             raise errors.InvalidUserState("Author not connected to a voice channel.")
 
+        timer = self.bot.get_cog('DisconnectTimer')
+
         if ctx.voice_client is None:
             await ctx.author.voice.channel.connect()
+            return await timer.start(ctx)
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
         
-        await self.reset_timer(ctx)
-
+        await timer.restart(ctx)
+        
     @join.before_invoke
-    async def reset_timer(self, ctx):
-        if self.disconnect_timer is not None:
-            await self.disconnect_timer.cancel()
-
-        self.disconnect_timer = DisconnectTimer(self.timeout_seconds, self.stop, ctx)
+    async def start_timer(self, ctx):
+        await self.bot.get_cog('DisconnectTimer').start(ctx)
 
 
     def get_random_file(self, path):
@@ -189,4 +185,5 @@ async def on_ready():
 
 bot.add_cog(Gavin(bot))
 bot.add_cog(ErrorHandler(bot))
+bot.add_cog(DisconnectTimer(bot))
 bot.run(DISCORD_TOKEN)
