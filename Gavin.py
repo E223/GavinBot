@@ -38,7 +38,8 @@ class Gavin(commands.Cog):
         self.bot = bot
         self.last_volume = 0.5
         self.playing_file_name = ""
-        self.disconnect_time = 300
+        self.timeout_seconds = 600
+        self.disconnect_timer = None
 
     @commands.command()
     @commands.is_owner()
@@ -64,19 +65,16 @@ class Gavin(commands.Cog):
         Joins a specified voice channel, or, if no channel is specified and the user
         running the command is in a voice channel, joins the channel they are currently in.
         """
-        global timer
         if channel is not None:
             if ctx.voice_client is not None:
                 return await ctx.voice_client.move_to(channel)
 
-            timer = DisconnectTimer(self.disconnect_time, self.stop, ctx)
             return await channel.connect()
 
         if ctx.author.voice:
             if ctx.voice_client is not None:
                 return await ctx.voice_client.move_to(ctx.author.voice.channel)
 
-            timer = DisconnectTimer(self.disconnect_time, self.stop, ctx)
             return await ctx.author.voice.channel.connect()
         else:
             await ctx.send("You are not connected to a voice channel.")
@@ -126,8 +124,10 @@ class Gavin(commands.Cog):
     @commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
-        self.playing_file_name = ""
         await ctx.voice_client.disconnect()
+        
+        self.playing_file_name = ""
+        await self.disconnect_timer.cancel()
 
     @commands.command()
     async def list(self, ctx, list_name):
@@ -160,6 +160,16 @@ class Gavin(commands.Cog):
             await ctx.author.voice.channel.connect()
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
+        
+        await self.reset_timer(ctx)
+
+    @join.before_invoke
+    async def reset_timer(self, ctx):
+        if self.disconnect_timer is not None:
+            self.disconnect_timer.cancel()
+
+        self.disconnect_timer = DisconnectTimer(self.timeout_seconds, self.stop, ctx)
+
 
     def get_random_file(self, path):
         """Gets a random file from a specified path"""
