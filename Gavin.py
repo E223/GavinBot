@@ -1,18 +1,15 @@
-"""
-This code has no issues whatsoever, there is no possible room for improvement,
-it is perfect in every way imaginable.
-"""
-
-import os
+import asyncio
 import discord
-import random
 import logging
+import random
+import os
+from discord.ext import commands
+from dotenv import load_dotenv
 from errors import errors
 from errors.ErrorHandler import ErrorHandler
-from discord.ext import commands
+from modules.DisconnectTimer import DisconnectTimer
 from os import listdir
 from os.path import isfile, join
-from dotenv import load_dotenv
 
 load_dotenv(dotenv_path='.env')
 
@@ -41,6 +38,7 @@ class Gavin(commands.Cog):
         self.bot = bot
         self.last_volume = 0.5
         self.playing_file_name = ""
+        self.disconnect_time = 300
 
     @commands.command()
     @commands.is_owner()
@@ -66,16 +64,19 @@ class Gavin(commands.Cog):
         Joins a specified voice channel, or, if no channel is specified and the user
         running the command is in a voice channel, joins the channel they are currently in.
         """
+        global timer
         if channel is not None:
             if ctx.voice_client is not None:
                 return await ctx.voice_client.move_to(channel)
 
+            timer = DisconnectTimer(self.disconnect_time, self.stop, ctx)
             return await channel.connect()
 
         if ctx.author.voice:
             if ctx.voice_client is not None:
                 return await ctx.voice_client.move_to(ctx.author.voice.channel)
 
+            timer = DisconnectTimer(self.disconnect_time, self.stop, ctx)
             return await ctx.author.voice.channel.connect()
         else:
             await ctx.send("You are not connected to a voice channel.")
@@ -125,7 +126,6 @@ class Gavin(commands.Cog):
     @commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
-
         self.playing_file_name = ""
         await ctx.voice_client.disconnect()
 
