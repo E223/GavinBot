@@ -41,9 +41,12 @@ class Gavin(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def test(self, ctx):
-        """Plays a random test clip"""
-        file = self.get_random_file(TEST_PATH)
+    async def test(self, ctx, *, clip_name = None):
+        """Plays a specific test clip, or if no clip is specified, plays a random test clip."""
+        if clip_name is not None:
+            file = self.get_file(TEST_PATH, clip_name)
+        else:
+            file = self.get_random_file(TEST_PATH)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -78,9 +81,12 @@ class Gavin(commands.Cog):
             await ctx.send("You are not connected to a voice channel.")
 
     @commands.command()
-    async def question(self, ctx):
-        """Plays a random Gavin question"""
-        file = self.get_random_file(QUESTION_PATH)
+    async def question(self, ctx, *, clip_name = None):
+        """Plays a specific question clip, or if no clip is specified, plays a random question clip."""
+        if clip_name is not None:
+            file = self.get_file(QUESTION_PATH, clip_name)
+        else:
+            file = self.get_random_file(QUESTION_PATH)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -88,9 +94,12 @@ class Gavin(commands.Cog):
         await ctx.send('Playing clip: {}'.format(self.playing_file_name))
 
     @commands.command()
-    async def response(self, ctx):
-        """Plays a random Gavin response"""
-        file = self.get_random_file(RESPONSE_PATH)
+    async def response(self, ctx, *, clip_name = None):
+        """Plays a specific response clip, or if no clip is specified, plays a random response clip."""
+        if clip_name is not None:
+            file = self.get_file(RESPONSE_PATH, clip_name)
+        else:
+            file = self.get_random_file(RESPONSE_PATH)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -98,9 +107,12 @@ class Gavin(commands.Cog):
         await ctx.send('Playing clip: {}'.format(self.playing_file_name))
 
     @commands.command()
-    async def laugh(self, ctx):
-        """Plays a random Gavin laugh"""
-        file = self.get_random_file(LAUGH_PATH)
+    async def laugh(self, ctx, *, clip_name = None):
+        """Plays a specific laugh clip, or if no clip is specified, plays a random laugh clip."""
+        if clip_name is not None:
+            file = self.get_file(LAUGH_PATH, clip_name)
+        else:
+            file = self.get_random_file(LAUGH_PATH)
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -136,7 +148,7 @@ class Gavin(commands.Cog):
         files = [f for f in listdir(path) if isfile(join(path, f))]
 
         embed = discord.Embed(
-            title=list_name.capitalize() + ' List',
+            title=list_name.capitalize() + ' Clips',
             colour=discord.Colour.blue(),
         )
 
@@ -166,6 +178,10 @@ class Gavin(commands.Cog):
     async def start_timer(self, ctx):
         await self.bot.get_cog('DisconnectTimer').start(ctx)
 
+    def get_file(self, path, file_name):
+        """Gets a file from a specified path"""
+        self.playing_file_name = file_name
+        return path + file_name
 
     def get_random_file(self, path):
         """Gets a random file from a specified path"""
