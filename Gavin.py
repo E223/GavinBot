@@ -48,6 +48,9 @@ class Gavin(commands.Cog):
         else:
             file = self.get_random_file(TEST_PATH)
 
+        if file is None:
+            return await ctx.send("Could not find clip")
+
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
@@ -88,6 +91,9 @@ class Gavin(commands.Cog):
         else:
             file = self.get_random_file(QUESTION_PATH)
 
+        if file is None:
+            return await ctx.send("Could not find clip")
+
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
@@ -101,6 +107,9 @@ class Gavin(commands.Cog):
         else:
             file = self.get_random_file(RESPONSE_PATH)
 
+        if file is None:
+            return await ctx.send("Could not find clip")
+
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
@@ -113,6 +122,9 @@ class Gavin(commands.Cog):
             file = self.get_file(LAUGH_PATH, clip_name)
         else:
             file = self.get_random_file(LAUGH_PATH)
+
+        if file is None:
+            return await ctx.send("Could not find clip")
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file), volume=self.last_volume)
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -180,8 +192,11 @@ class Gavin(commands.Cog):
 
     def get_file(self, path, file_name):
         """Gets a file from a specified path"""
-        self.playing_file_name = file_name
-        return path + file_name
+        if isfile(join(path, file_name)):
+            self.playing_file_name = file_name
+            return path + file_name
+        else:
+            return None
 
     def get_random_file(self, path):
         """Gets a random file from a specified path"""
